@@ -1,0 +1,22 @@
+{
+  "name": "catalogo-marvel",
+  "version": "1.0.0",
+  "description": "Programa para consumir a api da marvel com JS puro",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./bin/server.js"
+  },
+  "author": "Isaac Lopes",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "debug": "^4.3.1",
+    "express": "^4.17.1",
+    "http": "0.0.1-security",
+    "xhr": "^2.6.0",
+    "xhr2": "^0.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
