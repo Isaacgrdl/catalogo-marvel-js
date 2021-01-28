@@ -1,8 +1,14 @@
-function fazGet(url) {
+function fazGet() {
     let request = new XMLHttpRequest()
-    request.open("GET", url, false)
+    request.open("GET", `https://gateway.marvel.com:443/v1/public/characters?limit=10&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae`, false)
     request.send()
     return request.response
+}
+
+function listaDados() {
+    let data = fazGet();
+    let catalogo = JSON.parse(data);
+    return catalogoData = catalogo['data'];
 }
 
 function criaCard(personagem) {
@@ -37,17 +43,36 @@ function criaPaginacao() {
     lista.setAttribute("class", "page-item");
 
     link = document.createElement("a");
-    link.innerHTML = i;
+    link.setAttribute("href", "1");
     link.setAttribute("class", "page-link");
 
     lista.appendChild(link);
     return lista;
 }
 
+function paginar(){
+    let OFFSET = 0;
+    listaDados();
+
+    let paginas;
+    paginas = (catalogoData['total'] / 10);
+    let listaPaginas = new Array();
+    let listaLinks = new Array();
+
+    for(i=0; i < paginas; i++) {
+        listaPaginas.push(i);
+        OFFSET = OFFSET + 10;
+        listaLinks.push(`https://gateway.marvel.com:443/v1/public/characters?limit=10&offset=${OFFSET}&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae`);
+    }
+
+    listaPaginas.forEach(element => {
+        criaPaginacao();
+        paginacao.appendChild(lista);
+    });
+}
+
 function main() {
-    let data = fazGet("https://gateway.marvel.com:443/v1/public/characters?limit=10&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae");
-    let catalogo = JSON.parse(data);
-    let catalogoData = catalogo['data'];
+    listaDados();
     let personagens = catalogoData['results'];
 
     personagens.forEach(element => {
@@ -55,18 +80,7 @@ function main() {
         tabela.appendChild(coluna);
     });
 
-    let paginas;
-    paginas = (catalogoData['total'] / 10);
-    let listaPaginas = new Array();
-
-    for(i=0; i < paginas; i++) {
-        listaPaginas.push(i);
-    }
-
-    listaPaginas.forEach(element => {
-        let lista = criaPaginacao(element);
-        paginacao.appendChild(lista);
-    });
+    paginar();
 }
 
-main()
+main();
