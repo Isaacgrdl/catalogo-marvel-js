@@ -1,12 +1,12 @@
-function fazGet() {
+function fazGet(url) {
     let request = new XMLHttpRequest()
-    request.open("GET", `https://gateway.marvel.com:443/v1/public/characters?limit=10&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae`, false)
+    request.open("GET", url, false)
     request.send()
     return request.response
 }
 
-function listaDados() {
-    let data = fazGet();
+function listaDados(url) {
+    let data = fazGet(url);
     let catalogo = JSON.parse(data);
     return catalogoData = catalogo['data'];
 }
@@ -38,47 +38,100 @@ function criaCard(personagem) {
     return card;
 }
 
-function criaPaginacao() {
-    lista = document.createElement("li");
+function next(state) {
+    state.pagina++
+
+    if(state.pagina > state.totalPaginas) {
+        state.pagina--
+    }
+}
+
+function prev(state) {
+    state.pagina--
+
+    if(state.pagina < 1) {
+        state.pagina++
+    }
+}
+
+function goTo(state, pagina) {
+    if (pagina < 1){
+        state.pagina = 1;
+    }
+
+    state.pagina = pagina;
+
+    if (pagina > state.totalPaginas){
+        state.pagina = state.totalPaginas
+    }
+}
+
+function criarPagina(element) {
+    let lista = document.createElement("li");
     lista.setAttribute("class", "page-item");
 
     link = document.createElement("a");
-    link.setAttribute("href", "1");
+    link.innerHTML = element.index;
+    link.setAttribute("href", `#${element.index}`);
     link.setAttribute("class", "page-link");
+
+    link.onclick = function (){
+        let personagensDaPagina = listaDados(element.link)['results'];
+        removeDaTela();
+        populaTela(personagensDaPagina);
+    }
 
     lista.appendChild(link);
     return lista;
 }
 
-function paginar(){
-    let OFFSET = 0;
-    listaDados();
+function paginar() {
+    let lista = [];
+    let limit = 10;
 
-    let paginas;
-    paginas = (catalogoData['total'] / 10);
-    let listaPaginas = new Array();
-    let listaLinks = new Array();
+    const state = {
+        limit,
+        offset: 0,
+        pagina: 2,
+        totalPaginas: Math.ceil(catalogoData['total']/limit)
+    };
 
-    for(i=0; i < paginas; i++) {
-        listaPaginas.push(i);
-        OFFSET = OFFSET + 10;
-        listaLinks.push(`https://gateway.marvel.com:443/v1/public/characters?limit=10&offset=${OFFSET}&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae`);
+    for(i=state.offset; i <= state.totalPaginas; i++){
+        lista.push({
+            index: i,
+            offset: (i * limit),
+            link: `https://gateway.marvel.com:443/v1/public/characters?limit=${limit}&offset=${(i * limit)}&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae`
+        });
     }
 
-    listaPaginas.forEach(element => {
-        criaPaginacao();
-        paginacao.appendChild(lista);
-    });
+    lista.forEach(element => {
+        let pagina = criarPagina(element);
+        paginacao.appendChild(pagina);
+    });    
+
+
 }
 
-function main() {
-    listaDados();
-    let personagens = catalogoData['results'];
 
+function populaTela(personagens){
     personagens.forEach(element => {
         let coluna = criaCard(element);
         tabela.appendChild(coluna);
     });
+}
+
+function removeDaTela(){
+    var tabela = document.getElementById("tabela");
+    while (tabela.firstChild) {
+    tabela.removeChild(tabela.firstChild);
+    }
+}
+
+function main() {
+    listaDados(`https://gateway.marvel.com:443/v1/public/characters?limit=10&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae`);
+    let personagens = catalogoData['results'];
+
+    populaTela(personagens);
 
     paginar();
 }
