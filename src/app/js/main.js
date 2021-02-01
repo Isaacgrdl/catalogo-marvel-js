@@ -12,8 +12,8 @@ function listaDados(url) {
 }
 
 function criaCard(personagem) {
-    coluna = document.createElement("div");
-    coluna.setAttribute("class", "col");
+    col = document.createElement("div");
+    col.setAttribute("class", "col");
 
     card = document.createElement("div");
     card.setAttribute('class', "card");
@@ -29,41 +29,19 @@ function criaCard(personagem) {
     imagem.setAttribute('src', personagem.thumbnail['path'] + ".jpg");
     imagem.setAttribute('class', "card-img-top");
     imagem.setAttribute("height", "216px");
+
+    aButton = document.createElement("a");
+    aButton.innerHTML = "Saiba mais";
+    aButton.setAttribute("href", "#");
+    aButton.setAttribute("class", "btn btn-primary");
     
-    coluna.appendChild(card);
+    col.appendChild(card);
     card.appendChild(imagem);
     card.appendChild(cardBody);
     cardBody.appendChild(pNome);
+    cardBody.appendChild(aButton);
 
-    return card;
-}
-
-function next(state) {
-    state.pagina++
-
-    if(state.pagina > state.totalPaginas) {
-        state.pagina--
-    }
-}
-
-function prev(state) {
-    state.pagina--
-
-    if(state.pagina < 1) {
-        state.pagina++
-    }
-}
-
-function goTo(state, pagina) {
-    if (pagina < 1){
-        state.pagina = 1;
-    }
-
-    state.pagina = pagina;
-
-    if (pagina > state.totalPaginas){
-        state.pagina = state.totalPaginas
-    }
+    return col;
 }
 
 function criarPagina(element) {
@@ -82,6 +60,8 @@ function criarPagina(element) {
     }
 
     lista.appendChild(link);
+
+    console.log(element);
     return lista;
 }
 
@@ -92,31 +72,27 @@ function paginar() {
     const state = {
         limit,
         offset: 0,
-        pagina: 2,
         totalPaginas: Math.ceil(catalogoData['total']/limit)
     };
 
-    for(i=state.offset; i <= state.totalPaginas; i++){
+    for(i=state.offset; i <= 10; i++){
         lista.push({
             index: i,
             offset: (i * limit),
             link: `https://gateway.marvel.com:443/v1/public/characters?limit=${limit}&offset=${(i * limit)}&ts=1&apikey=9a4af59b888c9462199bc265a06f7d47&hash=a861437781f0ac43374a0161fee2b5ae`
         });
     }
-
+    
     lista.forEach(element => {
         let pagina = criarPagina(element);
         paginacao.appendChild(pagina);
-    });    
-
-
+    });
 }
-
 
 function populaTela(personagens){
     personagens.forEach(element => {
-        let coluna = criaCard(element);
-        tabela.appendChild(coluna);
+        let col = criaCard(element);
+        tabela.appendChild(col);
     });
 }
 
